@@ -1,0 +1,79 @@
+
+
+Here is the output JSON instance:
+
+{
+  "date": "2020-09-17T12:00:00Z",
+  "warmup": [
+    {
+      "name": "Jumping Jacks",
+      "body_parts": ["Legs", "Arms"],
+      "set": 3,
+      "rep": 20
+    },
+    {
+      "name": "High Knees",
+      "body_parts": ["Legs"],
+      "set": 3,
+      "rep": 20
+    },
+    {
+      "name": "Arm Circles",
+      "body_parts": ["Arms"],
+      "set": 3,
+      "rep": 20
+    }
+  ],
+  "exercises": [
+    {
+      "name": "Crunches",
+      "body_parts": ["Abs"],
+      "set": 3,
+      "rep": 20
+    },
+    {
+      "name": "Leg Raises",
+      "body_parts": ["Abs"],
+      "set": 3,
+      "rep": 20
+    },
+    {
+      "name": "Plank",
+      "body_parts": ["Abs"],
+      "set": 3,
+      "rep": 20
+    },
+    {
+      "name": "Side Plank",
+      "body_parts": ["Abs"],
+      "set": 3,
+      "rep": 20
+    },
+    {
+      "name": "Bicycle Crunches",
+      "body_parts": ["Abs"],
+      "set": 3,
+      "rep": 20
+    },
+    {
+      "name": "Russian Twists",
+      "body_parts": ["Abs"],
+      "set": 3,
+      "rep": 20
+    }
+  ],
+  "cooldown": [
+    {
+      "name": "Stretching",
+      "body_parts": ["Legs", "Arms"],
+      "set": 3,
+      "rep": 20
+    },
+    {
+      "name": "Yoga Poses",
+      "body_parts": ["Legs", "Arms"],
+      "set": 3,
+      "rep": 20
+    }
+  ]
+}

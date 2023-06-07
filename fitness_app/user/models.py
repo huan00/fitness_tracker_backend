@@ -43,20 +43,33 @@ def upload_path(instance, filename):
 class User(AbstractBaseUser, PermissionsMixin):
     GOAL_CHOICES = [(
         'A', 'Staying Healthy'), ('B', 'Lose Weight'), ('C', 'Tone Muscle'), ('D', 'Gain Muscle')]
+    WORKOUT_PROGRAM = [
+        ('A', 'Aerobic'),
+        ('B', 'Strength Training'),
+        ('C', 'Yoga'),
+        ('D', 'Flexibility Training'),
+        ('E', 'Balance Training'),
+        ('F', 'Interval Training'),
+        ('G', 'CrossFit'),
+        ('H', 'Pilates'),
+        ('I', 'Any')
+    ]
 
     email = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=100)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     age = models.IntegerField(blank=True, null=True)
-    sex = models.CharField(blank=True, null=True)
+    gender = models.CharField(blank=True, null=True, max_length=10)
     weight = models.IntegerField(blank=True, null=True)
     profile_image = models.ImageField(
         upload_to=upload_path, default='', blank=True)
-    height = models.IntegerField(blank=True, null=True)
-    workout_days = models.IntegerField(default=0, blank=True)
-    goal = models.CharField(default = 'A', choices= GOAL_CHOICES)
-    PR_history = models.JSONField(default=dict, blank=True)
+    height = models.JSONField(default=dict, blank=True)
+    # workout_days = models.IntegerField(default=0, blank=True)
+    # WorkoutPreference = models.CharField(
+    #     max_length=100, default='Any')
+    # goal = models.CharField(default='A', choices=GOAL_CHOICES, max_length=1)
+    # PR_history = models.JSONField(default=dict, blank=True)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -80,3 +93,32 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.email.split('@')[0]
+
+
+class WorkoutPreference(models.Model):
+    # name = models.CharField(max_length=255)
+    preference = models.ManyToManyField('Program')
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+
+
+class Program(models.Model):
+    name = models.CharField(max_length=255)
+
+
+class EquipmentList(models.Model):
+    # name = models.CharField(max_length=255)
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    equipments = models.ManyToManyField('Equipment')
+
+
+class Equipment(models.Model):
+    name = models.CharField(max_length=255)
+
+
+class WorkoutGoal(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    goals = models.ManyToManyField('Goal')
+
+
+class Goal(models.Model):
+    goal = models.CharField(max_length=255)
