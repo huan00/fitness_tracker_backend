@@ -1,17 +1,20 @@
+from django.http import HttpResponse
 from django.shortcuts import render
+from rest_framework.decorators import api_view
 import json
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from .serializers import UserSerializer, WorkoutPreferenceSerializer
+from .serializers import UserSerializer, ProgramSerializer, UserFullSerializer, GoalSerializer, EquipmentSerializer
 
 
 # Create your views here.
 
-from .models import User, WorkoutPreference
+from .models import User, WorkoutPreference, Program, EquipmentList, Equipment, Goal, WorkoutGoal
 
 
 class UserLoginView(ObtainAuthToken):
@@ -28,7 +31,13 @@ class UserLoginView(ObtainAuthToken):
             return Response({'error': 'Invalid Credentials'}, status=status.HTTP_404_NOT_FOUND)
 
         token, _ = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key})
+
+        userExist = User.objects.get(email=email)
+        userDataSerializer = UserFullSerializer(userExist)
+
+        userData = {'token': token.key, 'user': userDataSerializer.data}
+
+        return Response(userData, status=status.HTTP_200_OK)
 
 
 class UserRegisterView(generics.CreateAPIView):
@@ -49,9 +58,9 @@ class UserRegisterView(generics.CreateAPIView):
                 else:
                     userData[key] = data[key]
 
-        # workout_program = data['workout_program']
-        equipment_list = data['equipment_list']
-        workout_goal = data['workout_goal']
+        workout_program = data['workout_program'].split(',')
+        equipment_list = data['equipment_list'].split(',')
+        workout_goal = data['workout_goal'].split(',')
 
         email = request.data.get('email')
         password = request.data.get('password')
@@ -64,21 +73,43 @@ class UserRegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
+        # print(serializer.data['email'])
 
-        # user = User.objects.get(id=serializer.data.id)
+        user = User.objects.get(email=serializer.data['email'])
+        user = UserSerializer(user)
+        user = User.objects.get(id=user.data['id'])
+        # print(user)
 
-        # workout_program = WorkoutPreference.objects.get(
-        #     name=data['workout_program'])
-        # if workout_program:
-        #     user.workout_preference = workout_program
-        #     user.save()
-        # else:
-        #     workout_preference = WorkoutPreference()
-        #     workout_preference.
+        # check if program exist if not create program and add it to user
+        programList = Program.userProgram(workout_program)
+        programListSerializer = ProgramSerializer(programList, many=True)
 
-        print(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        WorkoutPreference.create(
+            programs=programListSerializer.data, user=user)
+
+        equipmentList = Equipment.userEquipment(equipment_list)
+        equipmentListSerializer = EquipmentSerializer(equipmentList, many=True)
+
+        EquipmentList.create(
+            equipmentList=equipmentListSerializer.data, user=user)
+
+        goalList = Goal.userGoal(workout_goal)
+        goalListSerializer = GoalSerializer(goalList, many=True)
+
+        WorkoutGoal.create(goalList=goalListSerializer.data, user=user)
+
+        userReturnSerializer = UserFullSerializer(user)
+
+        return Response(userReturnSerializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-data = {'first_name': 'Huan', 'last_name': 'Zeng', 'email': 'Huan123@gmail.com', 'password': 'abc', 'age': '36', 'gender': 'male', 'weight': '200', 'height': '', 'profile_image': 'file:///Users/huanzeng/Library/Developer/CoreSimulator/Devices/5FB59EDA-E353-4B52-A3A7-79022E0C34D9/data/Containers/Data/Application/DFDC02FA-2E00-4A2B-82DB-84C6A886943D/Library/Caches/ExponentExperienceData/%2540huan00%252Ffitness_app/Camera/6D25E6CE-96A3-49FA-A6D1-9C6E1F7AEE18.jpg',
-        'workout_program': 'Aerobic,Flexibility Training,Interval Training,Balance Training,CrossFit', 'equipment_list': 'Barbells,weight bench,resistance bands,kettlebells', 'workout_goal': 'Lost weight or body fat,Build muscle,Improve health'}
+@csrf_exempt
+# @api_view(['POST'])
+def add_program(request, format=None):
+
+    program = Program.create('build muscle')
+    print(program)
+    programSz = ProgramSerializer(program)
+    print(programSz.data)
+
+    return Response('hello')

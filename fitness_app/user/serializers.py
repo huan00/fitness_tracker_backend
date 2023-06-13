@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
-from .models import User, WorkoutPreference, Program
+from .models import User, WorkoutPreference, Program, Equipment, EquipmentList, Goal, WorkoutGoal
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -21,18 +21,6 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
 
-class WorkoutPreferenceSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = WorkoutPreference
-
-        fields = (
-            'id',
-            'user',
-            'program',
-        )
-
-
 class ProgramSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -41,3 +29,57 @@ class ProgramSerializer(serializers.ModelSerializer):
             'id',
             'name',
         )
+
+
+class WorkoutPreferenceSerializer(serializers.ModelSerializer):
+    preference = ProgramSerializer(many=True)
+
+    class Meta:
+        model = WorkoutPreference
+        fields = (
+            'id',
+            'user',
+            'preference',
+        )
+
+
+class EquipmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Equipment
+        fields = ('id', 'name')
+
+
+class EquipmentListSerializer(serializers.ModelSerializer):
+    equipments = EquipmentSerializer(many=True)
+
+    class Meta:
+        model = EquipmentList
+        fields = ('id', 'user', 'equipments')
+
+
+class GoalSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Goal
+        fields = ('id', 'goal')
+
+
+class WorkoutGoalSerializer(serializers.ModelSerializer):
+    goals = GoalSerializer(many=True)
+
+    class Meta:
+        model = WorkoutGoal
+        fields = ('id', 'user', 'goals')
+
+
+class UserFullSerializer(serializers.ModelSerializer):
+    workoutPreference = WorkoutPreferenceSerializer(many=True)
+    EquipmentsList = EquipmentListSerializer(many=True)
+    workoutGoals = WorkoutGoalSerializer(many=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'email', 'first_name', 'last_name', 'age', 'gender', 'weight', 'profile_image', 'height', 'workoutPreference', 'EquipmentsList', 'workoutGoals'
+        ]

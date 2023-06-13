@@ -2,6 +2,8 @@
 from django.db import models
 from django.contrib.auth.models import UserManager, AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+
 
 import os
 
@@ -98,27 +100,150 @@ class User(AbstractBaseUser, PermissionsMixin):
 class WorkoutPreference(models.Model):
     # name = models.CharField(max_length=255)
     preference = models.ManyToManyField('Program')
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='workoutPreference')
+
+    class Meta:
+        verbose_name = 'Workout'
+        verbose_name_plural = 'Workouts'
+
+    @classmethod
+    def create(self, programs, user):
+        preference = self(user=user)
+        preference.save()
+
+        for program in programs:
+            preference.preference.add(program['id'])
+
+        return preference
+
+    def __str__(self):
+        return 'Workout Preference'
 
 
 class Program(models.Model):
     name = models.CharField(max_length=255)
 
+    @classmethod
+    def create(self, name):
+        program = self(name=name)
+        program.save()
+        return program
+
+    @classmethod
+    def userProgram(self, programs):
+        result = []
+        for program in programs:
+            try:
+                programExist = Program.objects.get(name=program)
+                result.append(programExist)
+            except ObjectDoesNotExist:
+                newProgram = Program.create(name=program)
+                result.append(newProgram)
+
+        return result
+
+    def __str__(self):
+        return self.name
+
 
 class EquipmentList(models.Model):
-    # name = models.CharField(max_length=255)
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='EquipmentsList')
     equipments = models.ManyToManyField('Equipment')
+
+    class Meta:
+        verbose_name = 'equipment_list'
+        verbose_name_plural = 'equipment_lists'
+
+    @classmethod
+    def create(self, equipmentList, user):
+        equipments = self(user=user)
+        equipments.save()
+
+        print('hello')
+
+        for equipment in equipmentList:
+            equipments.equipments.add(equipment['id'])
+
+        return equipments
+
+    def __str__(self):
+        return 'equipment list'
 
 
 class Equipment(models.Model):
     name = models.CharField(max_length=255)
 
+    @classmethod
+    def create(self, name):
+        equipment = self(name=name)
+        equipment.save()
+
+        return equipment
+
+    @classmethod
+    def userEquipment(self, equipments):
+        equipmentList = []
+        for equipment in equipments:
+            try:
+                equipmentExist = Equipment.objects.get(name=equipment)
+                equipmentList.append(equipmentExist)
+            except ObjectDoesNotExist:
+                newEquipment = Equipment.create(name=equipment)
+                equipmentList.append(newEquipment)
+
+        return equipmentList
+
+    def __str__(self):
+        return self.name
+
 
 class WorkoutGoal(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='workoutGoals')
     goals = models.ManyToManyField('Goal')
+
+    class Meta:
+        verbose_name = 'goal'
+        verbose_name_plural = 'goals'
+
+    @classmethod
+    def create(self, goalList, user):
+        goals = self(user=user)
+        goals.save()
+
+        for goal in goalList:
+            goals.goals.add(goal['id'])
+
+        return goals
+
+    def __str__(self):
+        return 'goal'
 
 
 class Goal(models.Model):
     goal = models.CharField(max_length=255)
+
+    @classmethod
+    def create(self, goal):
+        goal = self(goal=goal)
+        goal.save()
+
+        return goal
+
+    @classmethod
+    def userGoal(self, goals):
+        goalList = []
+        for goal in goals:
+            try:
+                goalExist = Goal.objects.get(goal=goal)
+                goalList.append(goalExist)
+            except ObjectDoesNotExist:
+                newGoal = Goal.create(goal=goal)
+                goalList.append(newGoal)
+
+        return goalList
+
+    def __str__(self):
+        return self.goal

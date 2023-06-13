@@ -5,7 +5,8 @@ from user.models import User
 
 
 class Workout(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='workout')
     date = models.DateTimeField()
     distance = models.FloatField(blank=True)
     calories = models.IntegerField(blank=True, default='')
