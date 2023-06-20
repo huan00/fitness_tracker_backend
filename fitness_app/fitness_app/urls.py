@@ -21,7 +21,8 @@ from . import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('fitness-auth/', include('rest_framework.urls')),
-    path('fitness/', include('user.urls'))
+    path('fitness/', include('user.urls')),
+    path('fitness/', include('open_ai.urls'))
 
 ]
 

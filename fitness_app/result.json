@@ -1,0 +1,79 @@
+
+
+Here is the output:
+
+{
+  "date": "2020-09-14T00:00:00Z",
+  "warmup": [
+    {
+      "name": "Jumping Jacks",
+      "body_parts": ["Legs", "Arms"],
+      "set": 3,
+      "rep": 20
+    },
+    {
+      "name": "High Knees",
+      "body_parts": ["Legs"],
+      "set": 3,
+      "rep": 20
+    },
+    {
+      "name": "Arm Circles",
+      "body_parts": ["Arms"],
+      "set": 3,
+      "rep": 20
+    }
+  ],
+  "exercises": [
+    {
+      "name": "Push-Ups",
+      "body_parts": ["Chest", "Arms"],
+      "set": 3,
+      "rep": 10
+    },
+    {
+      "name": "Pull-Ups",
+      "body_parts": ["Back", "Arms"],
+      "set": 3,
+      "rep": 10
+    },
+    {
+      "name": "Dumbbell Shoulder Press",
+      "body_parts": ["Shoulders", "Arms"],
+      "set": 3,
+      "rep": 10
+    },
+    {
+      "name": "Dumbbell Bicep Curls",
+      "body_parts": ["Biceps", "Arms"],
+      "set": 3,
+      "rep": 10
+    },
+    {
+      "name": "Tricep Dips",
+      "body_parts": ["Triceps", "Arms"],
+      "set": 3,
+      "rep": 10
+    }
+  ],
+  "cooldown": [
+    {
+      "name": "Forward Lunges",
+      "body_parts": ["Legs"],
+      "set": 3,
+      "rep": 10
+    },
+    {
+      "name": "Calf Raises",
+      "body_parts": ["Legs"],
+      "set": 3,
+      "rep": 10
+    },
+    {
+      "name": "Arm Crosses",
+      "body_parts": ["Arms"],
+      "set": 3,
+      "rep": 10
+    }
+  ]
+}

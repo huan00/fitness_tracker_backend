@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-xgpkiqnpoy%01_g(6gsuiu($5mhn!-avwyw9842p7d$p4@7h=#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.4.27', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -42,12 +42,14 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'rest_framework',
-    'fitness',
     'user',
     'PIL',
-    'open_ai'
+    'open_ai',
+    'workout'
 
 ]
+
+CSRF_COOKIE_NAME = "csrftoken"
 
 
 AUTH_USER_MODEL = 'user.User'
@@ -58,6 +60,14 @@ AUTHENTICATION_BACKENDS = [
     'user.authentication.EmailAuthBackend',
     # 'user.users.EmailBackend'
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+
+    ),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

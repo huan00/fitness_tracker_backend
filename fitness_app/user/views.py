@@ -1,34 +1,44 @@
+from django.http import HttpResponse
 from django.shortcuts import render
-
+from rest_framework.decorators import api_view
+import json
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from .serializers import UserSerializer
+from .serializers import UserSerializer, ProgramSerializer, UserFullSerializer, GoalSerializer, EquipmentSerializer
 
 
 # Create your views here.
 
-from .models import User
+from .models import User, WorkoutPreference, Program, EquipmentList, Equipment, Goal, WorkoutGoal
+
 
 class UserLoginView(ObtainAuthToken):
-    def post (self, request, *args, **kwargs):
-        email = request.data.get('email')
+    def post(self, request, *args, **kwargs):
+        email = str.lower(request.data.get('email'))
         password = request.data.get('password')
 
         if email is None or password is None:
-            return Response ({'error': 'Please provide both email and password'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        user = authenticate(email = email, password = password)
+            return Response({'error': 'Please provide both email and password'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not user: 
+        user = authenticate(email=email, password=password)
+
+        if not user:
             return Response({'error': 'Invalid Credentials'}, status=status.HTTP_404_NOT_FOUND)
-    
+
         token, _ = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key})
-    
+
+        userExist = User.objects.get(email=email)
+        userDataSerializer = UserFullSerializer(userExist)
+
+        userData = {'token': token.key, 'user': userDataSerializer.data}
+
+        return Response(userData, status=status.HTTP_200_OK)
+
 
 class UserRegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -38,15 +48,68 @@ class UserRegisterView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
-        # email = request.data.get('email')
-        # password = request.data.get('password')
 
-        # if email is None or password is None:
-        #     return Response({'error': 'Please provide email, and password'}, status = status.HTTP_400_BAD_REQUEST)
-        
-        # user = User(email=email, password = make_password(password))
-        serializer = self.get_serializer(data=request.data)
+        data = request.data
+        userData = {}
+        for key in data:
+            if key != 'workout_program' and key != 'equipment_list' and key != 'workout_goal':
+                if key == 'height':
+                    userData[key] = json.loads(data[key])
+                else:
+                    userData[key] = data[key]
+
+        workout_program = data['workout_program'].split(',')
+        equipment_list = data['equipment_list'].split(',')
+        workout_goal = data['workout_goal'].split(',')
+
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        if email is None or password is None:
+            return Response({'error': 'Please provide email, and password'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # user = User(email=email, password=make_password(password))
+        serializer = self.get_serializer(data=userData)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        # print(serializer.data['email'])
+
+        user = User.objects.get(email=serializer.data['email'])
+        user = UserSerializer(user)
+        user = User.objects.get(id=user.data['id'])
+        # print(user)
+
+        # check if program exist if not create program and add it to user
+        programList = Program.userProgram(workout_program)
+        programListSerializer = ProgramSerializer(programList, many=True)
+
+        WorkoutPreference.create(
+            programs=programListSerializer.data, user=user)
+
+        equipmentList = Equipment.userEquipment(equipment_list)
+        equipmentListSerializer = EquipmentSerializer(equipmentList, many=True)
+
+        EquipmentList.create(
+            equipmentList=equipmentListSerializer.data, user=user)
+
+        goalList = Goal.userGoal(workout_goal)
+        goalListSerializer = GoalSerializer(goalList, many=True)
+
+        WorkoutGoal.create(goalList=goalListSerializer.data, user=user)
+
+        userReturnSerializer = UserFullSerializer(user)
+
+        return Response(userReturnSerializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+@csrf_exempt
+# @api_view(['POST'])
+def add_program(request, format=None):
+
+    program = Program.create('build muscle')
+    print(program)
+    programSz = ProgramSerializer(program)
+    print(programSz.data)
+
+    return Response('hello')
