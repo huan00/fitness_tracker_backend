@@ -1,9 +1,9 @@
 
 
-Here is the output JSON instance:
+Here is the output:
 
 {
-  "date": "2020-09-17T12:00:00Z",
+  "date": "2020-09-14T00:00:00Z",
   "warmup": [
     {
       "name": "Jumping Jacks",
@@ -26,54 +26,54 @@ Here is the output JSON instance:
   ],
   "exercises": [
     {
-      "name": "Crunches",
-      "body_parts": ["Abs"],
+      "name": "Push-Ups",
+      "body_parts": ["Chest", "Arms"],
       "set": 3,
-      "rep": 20
+      "rep": 10
     },
     {
-      "name": "Leg Raises",
-      "body_parts": ["Abs"],
+      "name": "Pull-Ups",
+      "body_parts": ["Back", "Arms"],
       "set": 3,
-      "rep": 20
+      "rep": 10
     },
     {
-      "name": "Plank",
-      "body_parts": ["Abs"],
+      "name": "Dumbbell Shoulder Press",
+      "body_parts": ["Shoulders", "Arms"],
       "set": 3,
-      "rep": 20
+      "rep": 10
     },
     {
-      "name": "Side Plank",
-      "body_parts": ["Abs"],
+      "name": "Dumbbell Bicep Curls",
+      "body_parts": ["Biceps", "Arms"],
       "set": 3,
-      "rep": 20
+      "rep": 10
     },
     {
-      "name": "Bicycle Crunches",
-      "body_parts": ["Abs"],
+      "name": "Tricep Dips",
+      "body_parts": ["Triceps", "Arms"],
       "set": 3,
-      "rep": 20
-    },
-    {
-      "name": "Russian Twists",
-      "body_parts": ["Abs"],
-      "set": 3,
-      "rep": 20
+      "rep": 10
     }
   ],
   "cooldown": [
     {
-      "name": "Stretching",
-      "body_parts": ["Legs", "Arms"],
+      "name": "Forward Lunges",
+      "body_parts": ["Legs"],
       "set": 3,
-      "rep": 20
+      "rep": 10
     },
     {
-      "name": "Yoga Poses",
-      "body_parts": ["Legs", "Arms"],
+      "name": "Calf Raises",
+      "body_parts": ["Legs"],
       "set": 3,
-      "rep": 20
+      "rep": 10
+    },
+    {
+      "name": "Arm Crosses",
+      "body_parts": ["Arms"],
+      "set": 3,
+      "rep": 10
     }
   ]
 }

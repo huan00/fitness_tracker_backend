@@ -49,6 +49,8 @@ INSTALLED_APPS = [
 
 ]
 
+CSRF_COOKIE_NAME = "csrftoken"
+
 
 AUTH_USER_MODEL = 'user.User'
 
@@ -58,6 +60,14 @@ AUTHENTICATION_BACKENDS = [
     'user.authentication.EmailAuthBackend',
     # 'user.users.EmailBackend'
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+
+    ),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
