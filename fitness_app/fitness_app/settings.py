@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'user',
     'PIL',
     'open_ai',
-    'workout'
+    'workout',
+
 
 ]
 
