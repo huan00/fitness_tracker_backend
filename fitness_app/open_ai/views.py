@@ -10,12 +10,14 @@ from rest_framework.permissions import IsAuthenticated
 
 from django.contrib.auth.decorators import login_required
 from pydantic import Field, validator, BaseModel
-from datetime import date
+import datetime
 from django.utils.timezone import now
 from user.models import User
 from user.serializers import UserFullSerializer
+from typing import Optional
 
 import pydantic_chatcompletion
+
 import re
 import os
 import openai
@@ -37,7 +39,9 @@ class Exercise(BaseModel):
     name: str
     body_parts: list[str]
     set: int
-    rep: int
+    rep: Optional[int]
+    duration: Optional[int]
+    rest_duration: Optional[int]
 
 
 class HIITExercise(BaseModel):
@@ -55,7 +59,6 @@ class HIITWorkoutFormat(BaseModel):
 
 
 class WorkoutFormat(BaseModel):
-    date: date
     warmup: list[Exercise]
     workout: list[Exercise]
     cooldown: list[Exercise]
@@ -68,33 +71,61 @@ class WorkoutFormat(BaseModel):
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 def getWorkout(request):
-    input_data = request.POST
+    workoutLevel, workoutTime, workoutEquipment, muscleGroup = request.data.items()
 
     user_email = Token.objects.get(key=request.auth).user
 
-    # def convertData(data):
-    #   result = []
-    #    for execise in data:
-    #         result.append(execise.dict())
+    def convertData(data):
 
-    #     return result
+        result = []
+        for execise in data:
+            result.append(execise.dict())
+
+        return result
 
     user = User.objects.get(email=user_email)
 
     userSerializer = UserFullSerializer(user)
-    print(userSerializer.data)
 
-    # messages = [{'role': 'user',
-    #              'content': 'create a 30 minutes exercise for the lower back, with 5 minutes warmup, 20 minutes workout, and 5 minutes cooldown'}]
+    goals = userSerializer.data['workoutGoals'][0]['goals']
 
-    # instance_of_my_data = pydantic_chatcompletion.create(
-    #     messages, WorkoutFormat, model='gpt-3.5-turbo')
+    user_goals = []
+    for goal in goals:
+        user_goals.append(goal['goal'])
 
-    # data = {'date': instance_of_my_data.date}
-    # data['warmup'] = convertData(instance_of_my_data.warmup)
-    # data['workout'] = convertData(instance_of_my_data.workout)
-    # data['cooldown'] = convertData(instance_of_my_data.cooldown)
+    user_equipments = []
+    for equipment in userSerializer.data['EquipmentsList'][0]['equipments']:
+        user_equipments.append(equipment['name'])
 
-    # return JsonResponse(data, safe=False)
+    user_preference = []
+    for preference in userSerializer.data['workoutPreference'][0]['preference']:
+        user_preference.append(preference['name'])
 
-    return HttpResponse({'hello'})
+    messages = [{'role': 'user',
+                 'content': f"""As an experienced personal trainer, develop a personalized and comprehensive workout of the day for your client, taking into account the following aspects:
+                 Fitness goals: {user_goals}.
+                 Experience level: {workoutLevel[1]}.
+                 Exercise frequency: 3 days a week.
+                 Equipment access: {user_equipments}.
+                 personal preference: {user_preference}.
+                 workout muscle: {muscleGroup[1]}
+                 Task Requirements:
+                 understand the clients fitness goals, experience level, and personal preferences.
+                 design a workout of the day that last {workoutTime[1]} minutes to help the client reach their fitness goal.
+                 warmup should have no rest duration.
+                 provide each exercise with approppriate set count, (rep counts or duration), and rest duration if needed.
+                 """}]
+
+    # print(messages)
+
+    instance_of_my_data = pydantic_chatcompletion.create(
+        messages, WorkoutFormat, model='gpt-3.5-turbo')
+
+    data = {'date': datetime.date.today()}
+    data['warmup'] = convertData(instance_of_my_data.warmup)
+    data['workout'] = convertData(instance_of_my_data.workout)
+    data['cooldown'] = convertData(instance_of_my_data.cooldown)
+
+    return JsonResponse(data, safe=False)
+
+    # return HttpResponse('messages')

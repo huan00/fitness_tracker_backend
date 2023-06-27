@@ -10,6 +10,8 @@ from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from .serializers import UserSerializer, ProgramSerializer, UserFullSerializer, GoalSerializer, EquipmentSerializer
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication, SessionAuthentication
+from rest_framework.decorators import authentication_classes
 
 
 # Create your views here.
@@ -101,6 +103,24 @@ class UserRegisterView(generics.CreateAPIView):
         userReturnSerializer = UserFullSerializer(user)
 
         return Response(userReturnSerializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+@api_view(['POST'])
+# @authentication_classes([TokenAuthentication])
+def verifyLogin(request):
+    print(request.auth)
+    email = Token.objects.get(key=request.auth).user
+
+    user = User.objects.get(email=email)
+
+    if user is not None:
+        userSerializer = UserFullSerializer(user)
+        json_data = json.dumps(userSerializer.data)
+        return Response(json_data, status=status.HTTP_202_ACCEPTED)
+    else:
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    # return Response({'error': 'hello'})
 
 
 @csrf_exempt
