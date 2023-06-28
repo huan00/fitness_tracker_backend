@@ -15,6 +15,7 @@ from django.utils.timezone import now
 from user.models import User
 from user.serializers import UserFullSerializer
 from typing import Optional
+from dotenv import load_dotenv
 
 import pydantic_chatcompletion
 
@@ -23,15 +24,19 @@ import os
 import openai
 
 import json
-from apikey import apikey
 
-os.environ['OPENAI_API_KEY'] = apikey
+load_dotenv()
 
+# os.environ['OPENAI_API_KEY'] = apikey
+
+
+api_key = os.environ.get('API_KEY')
+# print(os.environ)
 # Create your views here.
 
 model_name = 'text-davinci-003'
 temperature = 0.0
-openai.api_key = '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'
+openai.api_key = api_key
 # model = OpenAI(model_name=model_name, temperature=temperature, max_tokens=2000)
 
 

@@ -106,7 +106,7 @@ class UserRegisterView(generics.CreateAPIView):
 
 
 @api_view(['POST'])
-# @authentication_classes([TokenAuthentication])
+@authentication_classes([TokenAuthentication])
 def verifyLogin(request):
     print(request.auth)
     email = Token.objects.get(key=request.auth).user
@@ -119,8 +119,6 @@ def verifyLogin(request):
         return Response(json_data, status=status.HTTP_202_ACCEPTED)
     else:
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    # return Response({'error': 'hello'})
 
 
 @csrf_exempt
