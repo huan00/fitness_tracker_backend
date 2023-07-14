@@ -40,3 +40,4 @@ typing_extensions==4.5.0
 urllib3==2.0.2
 yarl==1.9.2
 python-dotenv==1.0.0
+pydantic_chatcompletion==0.0.3
