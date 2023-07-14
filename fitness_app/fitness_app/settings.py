@@ -110,11 +110,11 @@ WSGI_APPLICATION = 'fitness_app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'otherday_fitness',
-        'USER': 'otherday_fitness',
+        'NAME': 'railway',
+        'USER': 'postgres',
         'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
         'HOST': os.environ.get('DATABASE_URL'),
-        'PORT': '5432',
+        'PORT': '7440',
     }
 }
 
