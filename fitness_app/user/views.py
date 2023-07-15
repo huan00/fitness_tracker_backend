@@ -5,7 +5,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, permissions
 from rest_framework.response import Response
-from django.utils.email import normalize_email
+from django.contrib.auth.models import BaseUserManager
 from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
@@ -22,8 +22,8 @@ from .models import User, WorkoutPreference, Program, EquipmentList, Equipment, 
 
 class UserLoginView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        print('hit login')
-        email = normalize_email(request.data.get('email'))
+
+        email = BaseUserManager.normalize_email(request.data.get('email'))
         password = request.data.get('password')
 
         if email is None or password is None:
@@ -66,7 +66,7 @@ class UserRegisterView(generics.CreateAPIView):
         equipment_list = data['equipment_list'].split(',')
         workout_goal = data['workout_goal'].split(',')
 
-        email = normalize_email(request.data.get('email'))
+        email = BaseUserManager.normalize_email(request.data.get('email'))
         password = request.data.get('password')
 
         if email is None or password is None:
