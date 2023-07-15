@@ -21,6 +21,7 @@ from .models import User, WorkoutPreference, Program, EquipmentList, Equipment, 
 
 class UserLoginView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
+        print('hit login')
         email = str.lower(request.data.get('email'))
         password = request.data.get('password')
 

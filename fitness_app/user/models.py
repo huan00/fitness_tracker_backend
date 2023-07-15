@@ -161,8 +161,6 @@ class EquipmentList(models.Model):
         equipments = self(user=user)
         equipments.save()
 
-        print('hello')
-
         for equipment in equipmentList:
             equipments.equipments.add(equipment['id'])
 
