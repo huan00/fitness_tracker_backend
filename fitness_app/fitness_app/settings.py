@@ -54,8 +54,6 @@ INSTALLED_APPS = [
 ]
 
 CSRF_COOKIE_NAME = "csrftoken"
-
-
 AUTH_USER_MODEL = 'user.User'
 
 
