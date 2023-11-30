@@ -12,6 +12,7 @@ urlpatterns = [
     path('verifylogin', views.verifyLogin, name='verifyLogin'),
     path('updateuserpref', views.updateUserPref, name='updateUserPref'),
     path('updateuserworkoutgoal', views.updateUserWorkoutGoal, name='updateUserWorkoutGoal'),
+    path('updateuserequipment', views.updateUserEquipment, name='updateUserEquipment'),
     path('updateuser', views.updateUser, name='updateUser'),
     path('program', add_program, name='add_program')
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

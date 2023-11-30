@@ -10,7 +10,7 @@ from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from .serializers import UserSerializer, ProgramSerializer, UserFullSerializer, GoalSerializer, EquipmentSerializer, WorkoutPreferenceSerializer, WorkoutGoalSerializer
+from .serializers import UserSerializer, ProgramSerializer, UserFullSerializer, GoalSerializer, EquipmentSerializer, WorkoutPreferenceSerializer, WorkoutGoalSerializer, EquipmentListSerializer
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication, SessionAuthentication
 from rest_framework.decorators import authentication_classes
 from django.core.exceptions import ObjectDoesNotExist
@@ -178,7 +178,6 @@ def updateUserPref(request):
 @api_view(['PUT'])
 @authentication_classes([TokenAuthentication])
 def updateUserWorkoutGoal(request):
-
     user = User.objects.get(email=Token.objects.get(key=request.auth).user)
     userSerializer = UserFullSerializer(user)
     # user_prefs =userSerializer.data['workoutGoals']
@@ -199,12 +198,44 @@ def updateUserWorkoutGoal(request):
         return Response(json.dumps(user_workoutGoal.data), status=status.HTTP_202_ACCEPTED)
 
     except ObjectDoesNotExist:
-        # print('hello2')
         new_workoutGoal = WorkoutGoal.objects.create(user=user)
         for idx,goal in enumerate(request.data ):
             new_goal = Goal.objects.get(goal=goal)
             userWorkoutGoal.goals.add(new_goal)
         userWorkoutGoal.save()
+        
+        return Response(status=status.HTTP_201_CREATED)
+    else:
+
+        return Response({'error': 'Problem updating, try again later'}, status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+def updateUserEquipment(request):
+    user = User.objects.get(email=Token.objects.get(key=request.auth).user)
+    userSerializer = UserFullSerializer(user)
+    
+    try:
+        userEquipment = EquipmentList.objects.get(user=userSerializer.data['id'])
+        user_equipmentList = EquipmentListSerializer(userEquipment)
+        print(json.dumps(user_equipmentList.data['equipments']))
+        for equipment in user_equipmentList.data['equipments']:
+            # equipment = json.loads(equipment)
+            if equipment['name'] not in request.data:
+                remove_equipment = Equipment.objects.get(name=equipment['name'])
+                userEquipment.equipments.remove(remove_equipment)
+        for idx, equipment in enumerate(request.data):
+            new_equipment = Equipment.objects.get(name=equipment)
+            userEquipment.equipments.add(new_equipment)
+        userEquipment.save()
+        return Response(json.dumps(user_equipmentList.data), status=status.HTTP_202_ACCEPTED)
+
+    except ObjectDoesNotExist:
+        new_workoutGoal = WorkoutGoal.objects.create(user=user)
+        for idx,equipment in enumerate(request.data ):
+            new_equipment = Equipment.objects.get(name=equipment)
+            userEquipment.equipments.add(new_equipment)
+        userEquipment.save()
         
         return Response(status=status.HTTP_201_CREATED)
     else:
