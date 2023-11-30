@@ -8,9 +8,11 @@ attrs==23.1.0
 certifi==2023.11.17
 charset-normalizer==3.3.2
 distro==1.8.0
+dj-database-url==2.1.0
 Django==4.2.7
 django-cors-headers==4.3.1
 django-dotenv==1.4.2
+django-environ==0.11.2
 djangorestframework==3.14.0
 exceptiongroup==1.2.0
 frozenlist==1.4.0

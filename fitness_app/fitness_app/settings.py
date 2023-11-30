@@ -13,12 +13,15 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
 from dotenv import load_dotenv
+import environ
 load_dotenv()
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-print(BASE_DIR)
 
 
 # Quick-start development settings - unsuitable for production
@@ -119,14 +122,21 @@ WSGI_APPLICATION = 'fitness_app.wsgi.application'
 #     }
 # }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'fitness_app',
+#         'USER': 'fitness',
+#         'PASSWORD': 'fitness',
+#         'HOST': 'localhost'
+#     }
+# }
+
+
+# DATABASES = {'default': dj_database_url.config(default=DATABASE_URL)}
+    # dj_database_url.config(default = os.environ.get('DATABASE_URL'), conn_max_age=1800)
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'fitness_app',
-        'USER': 'fitness',
-        'PASSWORD': 'fitness',
-        'HOST': 'localhost'
-    }
+    'default': dj_database_url.parse(os.environ.get('DATABASE_URL')),
 }
 
 # Password validation
@@ -164,8 +174,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT =os.path.join(BASE_DIR, 'staticfiles')
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+# STATIC_ROOT =os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
