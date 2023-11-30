@@ -18,6 +18,7 @@ load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+print(BASE_DIR)
 
 
 # Quick-start development settings - unsuitable for production
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
     'PIL',
     'open_ai',
     'workout',
+
 
 
 ]
@@ -106,17 +108,26 @@ WSGI_APPLICATION = 'fitness_app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'railway',
+#         'USER': 'postgres',
+#         'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+#         'HOST': os.environ.get('DATABASE_URL'),
+#         'PORT': '7772',
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_URL'),
-        'PORT': '7772',
+        'NAME': 'fitness_app',
+        'USER': 'fitness',
+        'PASSWORD': 'fitness',
+        'HOST': 'localhost'
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -157,7 +168,12 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_ROOT = BASE_DIR/'media'/'profile'
+# MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'mediafiles')
+
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = 'media/'

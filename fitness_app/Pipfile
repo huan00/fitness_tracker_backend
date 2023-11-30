@@ -6,6 +6,13 @@ name = "pypi"
 [packages]
 django = "*"
 pydantic-chatcompletion = "*"
+djangorestframework = "*"
+django-cors-headers = "*"
+pillow = "*"
+psycopg2 = "*"
+django-dotenv = "*"
+python-dotenv = "*"
+openai = "*"
 
 [dev-packages]
 

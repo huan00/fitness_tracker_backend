@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from django.contrib.auth.decorators import login_required
 from pydantic import Field, validator, BaseModel
-import datetime
+from datetime import date
 from django.utils.timezone import now
 from user.models import User
 from user.serializers import UserFullSerializer
@@ -21,6 +21,7 @@ import pydantic_chatcompletion
 
 import re
 import os
+from openai import OpenAI
 import openai
 
 import json
@@ -34,9 +35,9 @@ api_key = os.environ.get('API_KEY')
 # print(os.environ)
 # Create your views here.
 
-model_name = 'text-davinci-003'
-temperature = 0.0
-openai.api_key = api_key
+# model_name = 'text-davinci-003'
+# temperature = 1
+# openai.api_key = api_key
 # model = OpenAI(model_name=model_name, temperature=temperature, max_tokens=2000)
 
 
@@ -76,23 +77,20 @@ class WorkoutFormat(BaseModel):
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 def getWorkout(request):
-    workoutLevel, workoutTime, workoutEquipment, muscleGroup = request.data.items()
-
+    workoutLevel, workoutTime, workoutEquipment, muscleGroup, workoutGoal = request.data.items()
     user_email = Token.objects.get(key=request.auth).user
 
     def convertData(data):
-
         result = []
         for execise in data:
             result.append(execise.dict())
-
         return result
 
     user = User.objects.get(email=user_email)
 
     userSerializer = UserFullSerializer(user)
-
     goals = userSerializer.data['workoutGoals'][0]['goals']
+    userData = userSerializer.data
 
     user_goals = []
     for goal in goals:
@@ -106,31 +104,72 @@ def getWorkout(request):
     for preference in userSerializer.data['workoutPreference'][0]['preference']:
         user_preference.append(preference['name'])
 
-    messages = [{'role': 'user',
-                 'content': f"""As an experienced personal trainer, develop a personalized and comprehensive workout of the day for your client, taking into account the following aspects:
-                 Fitness goals: {user_goals}.
-                 Experience level: {workoutLevel[1]}.
-                 Exercise frequency: 3 days a week.
-                 Equipment access: {user_equipments}.
-                 personal preference: {user_preference}.
-                 workout muscle: {muscleGroup[1]}
-                 Task Requirements:
-                 understand the clients fitness goals, experience level, and personal preferences.
-                 design a workout of the day that last {workoutTime[1]} minutes to help the client reach their fitness goal.
-                 warmup should have no rest duration.
-                 provide each exercise with approppriate set count, (rep counts or duration), and rest duration if needed.
-                 """}]
+    messages = {'role': 'user',
+                'content': f"""
 
-    # print(messages)
+                You are a spontaneous fitness trainer. \n
+                Create a personalize {workoutTime[1]} {workoutLevel[1]} level workout for your client that is a {userData['gender']}, {userData['age']} years old, {userData['height']['feet']} feet and {userData['height']['inches']} inches tall and weights {userData['weight']} focusing on {muscleGroup[1]} muscle for {workoutGoal[1]} 
 
-    instance_of_my_data = pydantic_chatcompletion.create(
-        messages, WorkoutFormat, model='gpt-3.5-turbo')
+                output your response in JSON format below:
 
-    data = {'date': datetime.date.today()}
-    data['warmup'] = convertData(instance_of_my_data.warmup)
-    data['workout'] = convertData(instance_of_my_data.workout)
-    data['cooldown'] = convertData(instance_of_my_data.cooldown)
+                workout: {{
+                    warmup:[{{
+                        name: string
+                        body_parts: list[string]
+                        set: number
+                        rep: number or undefined
+                        duration: number in seconds or undefined
+                        rest_duration: number or undefined}}
+                        ]
+                    ,
+                    workout: [{{
+                        name: string
+                        body_parts: list[string]
+                        set: number
+                        rep: number or undefined
+                        duration: number in seconds or undefined
+                        rest_duration: number or undefined}}
+                        ],
+                    cooldown: [{{
+                        name: string
+                        body_parts: list[string]
+                        set: number
+                        rep: number or undefined
+                        duration: number in seconds or undefined
+                        rest_duration: number or undefined}}
+                        ]
+                }}
+            
+
+                """
+                }
+
+    client = OpenAI(api_key=api_key)
+    # response = client.chat.completions.create(
+    #     model='gpt-3.5-turbo-1106',
+    #     # response_format={'type': 'json_object'},
+    #     messages=[
+    #         {'role': 'system', 'content':'You are a professional fitness trainer design to help create fitness workouts.'},
+    #         {'role': 'user', 'content': messages },
+
+    #     ]
+
+    # )
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo-1106",
+        response_format={ "type": "json_object" },
+        messages=[
+            {"role": "system", "content": "You are a professional fitness trainer design to help create fitness workouts. output result in JSON."},
+            {**messages}
+        ]
+        )
+
+    # print(response.choices[0].message.content)
+    # instance_of_my_data = pydantic_chat.completion.create(
+    #     messages, WorkoutFormat, model='gpt-3.5-turbo')
+
+    data = json.loads(response.choices[0].message.content)['workout']
+    data['date'] = date.today()
 
     return JsonResponse(data, safe=False)
-
-    # return HttpResponse('messages')
+    return JsonResponse('data', safe=False)

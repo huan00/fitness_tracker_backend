@@ -37,6 +37,7 @@ class CustomUserManager(UserManager):
 
 
 def upload_path(instance, filename):
+    # return 'images/{filename}'.format(filename=filename)
     if instance:
         return '/'.join(['profile', filename])
     return None
@@ -64,8 +65,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     age = models.IntegerField(blank=True, null=True)
     gender = models.CharField(blank=True, null=True, max_length=10)
     weight = models.IntegerField(blank=True, null=True)
-    profile_image = models.ImageField(
-        upload_to=upload_path, default='', blank=True)
+    profile_image = models.ImageField(upload_to=upload_path, blank=True, null=True)
     height = models.JSONField(default=dict, blank=True)
     # workout_days = models.IntegerField(default=0, blank=True)
     # WorkoutPreference = models.CharField(

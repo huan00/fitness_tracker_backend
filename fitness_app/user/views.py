@@ -10,9 +10,11 @@ from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from .serializers import UserSerializer, ProgramSerializer, UserFullSerializer, GoalSerializer, EquipmentSerializer
+from .serializers import UserSerializer, ProgramSerializer, UserFullSerializer, GoalSerializer, EquipmentSerializer, WorkoutPreferenceSerializer, WorkoutGoalSerializer
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication, SessionAuthentication
 from rest_framework.decorators import authentication_classes
+from django.core.exceptions import ObjectDoesNotExist
+
 
 
 # Create your views here.
@@ -67,11 +69,12 @@ class UserRegisterView(generics.CreateAPIView):
         workout_goal = data['workout_goal'].split(',')
 
         email = BaseUserManager.normalize_email(request.data.get('email'))
+        # print(email)
         password = request.data.get('password')
 
         if email is None or password is None:
             return Response({'error': 'Please provide email, and password'}, status=status.HTTP_400_BAD_REQUEST)
-
+        userData['email'] = email
         # user = User(email=email, password=make_password(password))
         serializer = self.get_serializer(data=userData)
         serializer.is_valid(raise_exception=True)
@@ -110,7 +113,8 @@ class UserRegisterView(generics.CreateAPIView):
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 def verifyLogin(request):
-    print(request.auth)
+    
+    # print(request.auth)
     email = Token.objects.get(key=request.auth).user
 
     user = User.objects.get(email=email)
@@ -122,6 +126,91 @@ def verifyLogin(request):
     else:
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+def updateUser(request):
+    email = Token.objects.get(key=request.auth).user
+    updated_data = request.data
+
+    user = User.objects.get(email=Token.objects.get(key=request.auth).user)
+
+    if user is not None:
+        User.objects.filter(email=user).update(**updated_data)
+        return Response(status=status.HTTP_202_ACCEPTED)
+    else:
+        return Response({'error': 'User not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+def updateUserPref(request):
+    user = User.objects.get(email=Token.objects.get(key=request.auth).user)
+    userSerializer = UserFullSerializer(user)
+    user_prefs = userSerializer.data['workoutPreference']
+
+    try:
+        userWorkoutPref = WorkoutPreference.objects.get(user=userSerializer.data['id'])
+        user_workoutPref = WorkoutPreferenceSerializer(userWorkoutPref)
+
+        for idx, program in enumerate(user_workoutPref.data['preference']):
+            if program['name'] not in request.data:
+                remove_program = Program.objects.get(name=program['name'])
+                userWorkoutPref.preference.remove(remove_program)
+
+        for idx,program in enumerate(request.data ):
+            if program not in json.dumps(user_workoutPref.data['preference']):
+                new_program = Program.objects.get(name=program)
+                userWorkoutPref.preference.add(new_program)
+                userWorkoutPref.save()
+        return Response(json.dumps(user_workoutPref.data), status=status.HTTP_202_ACCEPTED)
+
+    except ObjectDoesNotExist:
+        new_workoutPref = WorkoutPreference.objects.create(user=user)
+        for idx,program in enumerate(request.data ):
+            new_program = Program.objects.get(name=program)
+            userWorkoutPref.preference.add(new_program)
+        userWorkoutPref.save()
+        
+        return Response(status=status.HTTP_201_CREATED)
+    else:
+        return Response({'error': 'Problem updating, try again later'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+def updateUserWorkoutGoal(request):
+
+    user = User.objects.get(email=Token.objects.get(key=request.auth).user)
+    userSerializer = UserFullSerializer(user)
+    # user_prefs =userSerializer.data['workoutGoals']
+    
+    try:
+        userWorkoutGoal = WorkoutGoal.objects.get(user=userSerializer.data['id'])
+        user_workoutGoal = WorkoutGoalSerializer(userWorkoutGoal)
+        print(json.dumps(user_workoutGoal.data['goals']))
+        for goal in user_workoutGoal.data['goals']:
+            # goal = json.loads(goal)
+            if goal['goal'] not in request.data:
+                remove_goal = Goal.objects.get(goal=goal['goal'])
+                userWorkoutGoal.goals.remove(remove_goal)
+        for idx, goal in enumerate(request.data):
+            new_goal = Goal.objects.get(goal=goal)
+            userWorkoutGoal.goals.add(new_goal)
+        userWorkoutGoal.save()
+        return Response(json.dumps(user_workoutGoal.data), status=status.HTTP_202_ACCEPTED)
+
+    except ObjectDoesNotExist:
+        # print('hello2')
+        new_workoutGoal = WorkoutGoal.objects.create(user=user)
+        for idx,goal in enumerate(request.data ):
+            new_goal = Goal.objects.get(goal=goal)
+            userWorkoutGoal.goals.add(new_goal)
+        userWorkoutGoal.save()
+        
+        return Response(status=status.HTTP_201_CREATED)
+    else:
+
+        return Response({'error': 'Problem updating, try again later'}, status=status.HTTP_400_BAD_REQUEST)
+        
 
 @csrf_exempt
 # @api_view(['POST'])

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from .models import User, WorkoutPreference, Program, Equipment, EquipmentList, Goal, WorkoutGoal
-
+from workout.serializers import WorkoutExerciseSerializer
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -77,9 +77,10 @@ class UserFullSerializer(serializers.ModelSerializer):
     workoutPreference = WorkoutPreferenceSerializer(many=True)
     EquipmentsList = EquipmentListSerializer(many=True)
     workoutGoals = WorkoutGoalSerializer(many=True)
+    workouts = WorkoutExerciseSerializer(many=True)
 
     class Meta:
         model = User
         fields = [
-            'id', 'email', 'first_name', 'last_name', 'age', 'gender', 'weight', 'profile_image', 'height', 'workoutPreference', 'EquipmentsList', 'workoutGoals'
+            'id', 'email', 'first_name', 'last_name', 'age', 'gender', 'weight', 'profile_image', 'height', 'workoutPreference', 'EquipmentsList', 'workoutGoals', 'workouts'
         ]
