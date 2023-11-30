@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 from . import views
-from .views import UserLoginView, UserRegisterView, add_program
+from .views import UserLoginView, UserRegisterView
 
 
 urlpatterns = [
@@ -14,5 +14,4 @@ urlpatterns = [
     path('updateuserworkoutgoal', views.updateUserWorkoutGoal, name='updateUserWorkoutGoal'),
     path('updateuserequipment', views.updateUserEquipment, name='updateUserEquipment'),
     path('updateuser', views.updateUser, name='updateUser'),
-    path('program', add_program, name='add_program')
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
