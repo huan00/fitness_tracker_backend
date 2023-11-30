@@ -25,7 +25,7 @@ from .models import User, WorkoutPreference, Program, EquipmentList, Equipment, 
 class UserLoginView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
 
-        email = BaseUserManager.normalize_email(request.data.get('email'))
+        email = BaseUserManager.normalize_email(request.data.get('email')).lower()
         password = request.data.get('password')
 
         if email is None or password is None:
@@ -113,8 +113,6 @@ class UserRegisterView(generics.CreateAPIView):
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 def verifyLogin(request):
-    
-    # print(request.auth)
     email = Token.objects.get(key=request.auth).user
 
     user = User.objects.get(email=email)
@@ -133,7 +131,7 @@ def updateUser(request):
     updated_data = request.data
 
     user = User.objects.get(email=Token.objects.get(key=request.auth).user)
-
+    # update user info
     if user is not None:
         User.objects.filter(email=user).update(**updated_data)
         return Response(status=status.HTTP_202_ACCEPTED)
@@ -146,7 +144,7 @@ def updateUserPref(request):
     user = User.objects.get(email=Token.objects.get(key=request.auth).user)
     userSerializer = UserFullSerializer(user)
     user_prefs = userSerializer.data['workoutPreference']
-
+    # get user instance
     try:
         userWorkoutPref = WorkoutPreference.objects.get(user=userSerializer.data['id'])
         user_workoutPref = WorkoutPreferenceSerializer(userWorkoutPref)
@@ -155,14 +153,14 @@ def updateUserPref(request):
             if program['name'] not in request.data:
                 remove_program = Program.objects.get(name=program['name'])
                 userWorkoutPref.preference.remove(remove_program)
-
+        # remove program if not in list
         for idx,program in enumerate(request.data ):
             if program not in json.dumps(user_workoutPref.data['preference']):
                 new_program = Program.objects.get(name=program)
                 userWorkoutPref.preference.add(new_program)
                 userWorkoutPref.save()
         return Response(json.dumps(user_workoutPref.data), status=status.HTTP_202_ACCEPTED)
-
+    # create new programlist
     except ObjectDoesNotExist:
         new_workoutPref = WorkoutPreference.objects.create(user=user)
         for idx,program in enumerate(request.data ):
@@ -180,23 +178,23 @@ def updateUserPref(request):
 def updateUserWorkoutGoal(request):
     user = User.objects.get(email=Token.objects.get(key=request.auth).user)
     userSerializer = UserFullSerializer(user)
-    # user_prefs =userSerializer.data['workoutGoals']
     
     try:
+        # get user instance
         userWorkoutGoal = WorkoutGoal.objects.get(user=userSerializer.data['id'])
         user_workoutGoal = WorkoutGoalSerializer(userWorkoutGoal)
-        print(json.dumps(user_workoutGoal.data['goals']))
+
         for goal in user_workoutGoal.data['goals']:
-            # goal = json.loads(goal)
             if goal['goal'] not in request.data:
                 remove_goal = Goal.objects.get(goal=goal['goal'])
                 userWorkoutGoal.goals.remove(remove_goal)
+        # remove goal if not in list
         for idx, goal in enumerate(request.data):
             new_goal = Goal.objects.get(goal=goal)
             userWorkoutGoal.goals.add(new_goal)
         userWorkoutGoal.save()
         return Response(json.dumps(user_workoutGoal.data), status=status.HTTP_202_ACCEPTED)
-
+    # create new goalist
     except ObjectDoesNotExist:
         new_workoutGoal = WorkoutGoal.objects.create(user=user)
         for idx,goal in enumerate(request.data ):
@@ -216,20 +214,23 @@ def updateUserEquipment(request):
     userSerializer = UserFullSerializer(user)
     
     try:
+        # get user instance
         userEquipment = EquipmentList.objects.get(user=userSerializer.data['id'])
         user_equipmentList = EquipmentListSerializer(userEquipment)
-        print(json.dumps(user_equipmentList.data['equipments']))
+
+        # remove equipment if not in list
         for equipment in user_equipmentList.data['equipments']:
-            # equipment = json.loads(equipment)
             if equipment['name'] not in request.data:
                 remove_equipment = Equipment.objects.get(name=equipment['name'])
                 userEquipment.equipments.remove(remove_equipment)
+        #add requipment
         for idx, equipment in enumerate(request.data):
             new_equipment = Equipment.objects.get(name=equipment)
             userEquipment.equipments.add(new_equipment)
         userEquipment.save()
         return Response(json.dumps(user_equipmentList.data), status=status.HTTP_202_ACCEPTED)
 
+    # create new equipmentlist
     except ObjectDoesNotExist:
         new_workoutGoal = WorkoutGoal.objects.create(user=user)
         for idx,equipment in enumerate(request.data ):
@@ -242,14 +243,3 @@ def updateUserEquipment(request):
 
         return Response({'error': 'Problem updating, try again later'}, status=status.HTTP_400_BAD_REQUEST)
         
-
-@csrf_exempt
-# @api_view(['POST'])
-def add_program(request, format=None):
-
-    program = Program.create('build muscle')
-    print(program)
-    programSz = ProgramSerializer(program)
-    print(programSz.data)
-
-    return Response('hello')

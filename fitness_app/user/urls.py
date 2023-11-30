@@ -16,9 +16,3 @@ urlpatterns = [
     path('updateuser', views.updateUser, name='updateUser'),
     path('program', add_program, name='add_program')
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-
-# if settings.DEBUG:
-#     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-# print(settings.MEDIA_ROOT)
