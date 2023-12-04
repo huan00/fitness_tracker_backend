@@ -32,6 +32,7 @@ load_dotenv()
 
 
 api_key = os.environ.get('API_KEY')
+print(api_key)
 # print(os.environ)
 # Create your views here.
 
@@ -145,16 +146,7 @@ def getWorkout(request):
                 }
 
     client = OpenAI(api_key=api_key)
-    # response = client.chat.completions.create(
-    #     model='gpt-3.5-turbo-1106',
-    #     # response_format={'type': 'json_object'},
-    #     messages=[
-    #         {'role': 'system', 'content':'You are a professional fitness trainer design to help create fitness workouts.'},
-    #         {'role': 'user', 'content': messages },
 
-    #     ]
-
-    # )
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-1106",
         response_format={ "type": "json_object" },
@@ -164,12 +156,7 @@ def getWorkout(request):
         ]
         )
 
-    # print(response.choices[0].message.content)
-    # instance_of_my_data = pydantic_chat.completion.create(
-    #     messages, WorkoutFormat, model='gpt-3.5-turbo')
-
     data = json.loads(response.choices[0].message.content)['workout']
     data['date'] = date.today()
 
     return JsonResponse(data, safe=False)
-    return JsonResponse('data', safe=False)
