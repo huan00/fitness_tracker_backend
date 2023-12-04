@@ -32,14 +32,6 @@ load_dotenv()
 
 
 api_key = os.environ.get('API_KEY')
-print(api_key)
-# print(os.environ)
-# Create your views here.
-
-# model_name = 'text-davinci-003'
-# temperature = 1
-# openai.api_key = api_key
-# model = OpenAI(model_name=model_name, temperature=temperature, max_tokens=2000)
 
 
 class Exercise(BaseModel):
