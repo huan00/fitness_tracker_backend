@@ -60,7 +60,8 @@ class UserRegisterView(generics.CreateAPIView):
         for key in data:
             if key != 'workout_program' and key != 'equipment_list' and key != 'workout_goal':
                 if key == 'height':
-                    userData[key] = data[key]
+                    height_data = json.loads(data[key])
+                    userData[key] = {'feet':height_data['feet'], 'inches': height_data['inches']}
                 else:
                     userData[key] = data[key]
 
